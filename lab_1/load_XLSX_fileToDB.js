@@ -2,18 +2,31 @@
 
 const db = require('./db');
 const xlsx = require('xlsx');
-const LinesBuilder = require('./prepareLinesForSQL');
+const LinesBuilder = require('./linesBuilderForSQL');
 
-const wb = xlsx.readFile('text_files/World_Happiness.xlsx');
+const loadData_XLSX_FromSource = async (file, tableName, sheet) => {
 
-const ws = wb.Sheets["Data behind Table 2.1 WHR 2017"];
+    const tableNameLowerCase = tableName.toLowerCase();
+    const linesBuilder = new LinesBuilder(tableNameLowerCase);
 
-const data = xlsx.utils.sheet_to_json(ws);
+    const wb = xlsx.readFile(`text_files/${file}.xlsx`);
+    const ws = wb.Sheets[sheet];
+    const allData = xlsx.utils.sheet_to_json(ws, {defval: ""});
+     
+    let argumentsLine = null;
 
-console.log(data[0]);
+    for (const data of allData) {
 
-for (const field in data[0]) {
-    data[0] = data[0].toLowerCase();
+        if (argumentsLine === null) {
+            argumentsLine = linesBuilder.createArgumentsLine(data);
+        }
+
+        const valuesLine = linesBuilder.createValuesLine(data);
+
+        await db.query(`insert into ${tableNameLowerCase}(${argumentsLine}) values(${valuesLine})`)
+            .catch(err => console.log(err));
+    
+    };
 }
 
-console.log(data[0]);
+loadData_XLSX_FromSource('World_Happiness', 'happiness', 'Data behind Table 2.1 WHR 2017');

@@ -1,7 +1,5 @@
 "use strict";
 
-const db = require('./db');
-
 class LinesBuilder {
     
     constructor(tableName) {
@@ -13,7 +11,7 @@ class LinesBuilder {
 
         let line = '';
         for (let index = 0; index < fields.length; index++) {
-            line += fields[index].toLowerCase();
+            line += fields[index].toLowerCase().replace(/ |-|\//gi, '_');
             if (index < fields.length - 1) {
                 line += ', ';
             }
@@ -46,13 +44,12 @@ class LinesBuilder {
 
     makeValidData(data) {
         for (const field in data) {            
-            if (data[field].indexOf("'") > - 1) {
+            if ((typeof(data[field]) ==='string') && data[field].indexOf("'") > - 1) {
                 data[field] = data[field].replace(/'/gi, "''");
             }
         }
         return data;
     }
-
 }
 
 module.exports = LinesBuilder;

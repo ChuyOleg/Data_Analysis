@@ -3,9 +3,9 @@
 const db = require('./db');
 const csv = require('csv-parser');
 const fs = require('fs');
-const LinesBuilder = require('./prepareLinesForSQL');
+const LinesBuilder = require('./linesBuilderForSQL');
 
-const loadDataFromSource = async (file, tableName) => {
+const loadData_CSV_FromSource = async (file, tableName) => {
 
     const tableNameLowerCase = tableName.toLowerCase();
     const linesBuilder = new LinesBuilder(tableNameLowerCase);
@@ -24,15 +24,12 @@ const loadDataFromSource = async (file, tableName) => {
 
         await db.query(`insert into ${tableNameLowerCase}(${argumentsLine}) values(${valuesLine})`)
             .catch(err => console.log(valuesLine));
-
     })
     .on('end', () => {
         console.log('END')
     });
 }
 
-//loadDataFromSource('summer', 'Tournaments');
-
-//loadDataFromSource('winter', 'Tournaments');
-
-// loadDataFromSource('WPP2019_TotalPopulationBySex', 'Population');
+loadData_CSV_FromSource('summer', 'Tournaments');
+loadData_CSV_FromSource('winter', 'Tournaments');
+loadData_CSV_FromSource('WPP2019_TotalPopulationBySex', 'Population');
