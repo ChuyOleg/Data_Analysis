@@ -29,4 +29,5 @@ const loadData_XLSX_FromSource = async (file, tableName, sheet) => {
     };
 }
 
-loadData_XLSX_FromSource('World_Happiness', 'happiness', 'Data behind Table 2.1 WHR 2017');
+// no longer used
+// loadData_XLSX_FromSource('World_Happiness', 'happiness', 'Data behind Table 2.1 WHR 2017');

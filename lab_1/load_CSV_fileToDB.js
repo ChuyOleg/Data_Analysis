@@ -23,13 +23,15 @@ const loadData_CSV_FromSource = async (file, tableName) => {
         const valuesLine = linesBuilder.createValuesLine(data);
 
         await db.query(`insert into ${tableNameLowerCase}(${argumentsLine}) values(${valuesLine})`)
-            .catch(err => console.log(valuesLine));
-    })
+            .catch(err => console.log(err));
+
+        })
     .on('end', () => {
         console.log('END')
     });
 }
 
-loadData_CSV_FromSource('summer', 'Tournaments');
-loadData_CSV_FromSource('winter', 'Tournaments');
+// loadData_CSV_FromSource('summer', 'Tournaments');
+// loadData_CSV_FromSource('winter', 'Tournaments');
 loadData_CSV_FromSource('WPP2019_TotalPopulationBySex', 'Population');
+// loadData_CSV_FromSource('nobel_laureates', 'nobel_laureates');
