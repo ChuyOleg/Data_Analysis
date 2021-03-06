@@ -55,9 +55,9 @@ create table mainschema.time_dimension(
 	year int
 );
 
-create table mainschema.country_dimension(
-	country_id serial Primary Key,
-	country text
+create table mainschema.location_dimension(
+	location_id serial Primary Key,
+	location text
 );
 
 create table mainschema.gender_dimension(
@@ -115,7 +115,7 @@ create table mainschema.organization_dimension(
 create table mainschema.fact_table(
 	fact_id serial Primary Key,
 	time_id int NOT NULL references mainschema.time_dimension(time_id),
-	country_id int NOT NULL references mainschema.country_dimension(country_id),
+	location_id int NOT NULL references mainschema.location_dimension(location_id),
 	gender_id int references mainschema.gender_dimension(gender_id),
 	sport_id int references mainschema.sport_dimension(sport_id),
 	athlete_id int references mainschema.athlete_dimension(athlete_id),

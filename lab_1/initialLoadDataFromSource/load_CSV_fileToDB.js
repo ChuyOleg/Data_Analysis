@@ -1,6 +1,6 @@
 "use strict";
 
-const db = require('./db');
+const db = require('../db');
 const csv = require('csv-parser');
 const fs = require('fs');
 const LinesBuilder = require('./linesBuilderForSQL');
@@ -12,7 +12,7 @@ const loadData_CSV_FromSource = async (file, tableName) => {
 
     let argumentsLine = null;
 
-    fs.createReadStream(`text_files/${file}.csv`)
+    await fs.createReadStream(`text_files/${file}.csv`)
     .pipe(csv())
     .on('data', async data => {
 
@@ -31,7 +31,9 @@ const loadData_CSV_FromSource = async (file, tableName) => {
     });
 }
 
-// loadData_CSV_FromSource('summer', 'Tournaments');
-// loadData_CSV_FromSource('winter', 'Tournaments');
-loadData_CSV_FromSource('WPP2019_TotalPopulationBySex', 'Population');
-// loadData_CSV_FromSource('nobel_laureates', 'nobel_laureates');
+(async () => {
+    await loadData_CSV_FromSource('summer', 'Tournaments');
+    await loadData_CSV_FromSource('winter', 'Tournaments');
+    await loadData_CSV_FromSource('WPP2019_TotalPopulationBySex', 'Population');
+    await loadData_CSV_FromSource('nobel_laureates', 'nobel_laureates');
+})();
