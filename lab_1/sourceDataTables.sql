@@ -1,6 +1,6 @@
 -- create tables for loading source data
 
-create table tournaments(
+create table public.tournaments(
 	year int,
 	city text,
 	sport text,
@@ -12,7 +12,7 @@ create table tournaments(
 	medal varchar(24)
 );
 
-create table population(
+create table public.population(
 	locid int,
 	location text,
 	varid int,
@@ -25,7 +25,7 @@ create table population(
 	popdensity float
 );
 
-create table nobel_laureates(
+create table public.nobel_laureates(
 	Year int,
 	Category text,
 	Prize text,
@@ -72,10 +72,21 @@ create table mainschema.sport_dimension(
 	event text
 );
 
-create table mainschema.athlete_dimension(
-	athlete_id serial Primary Key,
-	athlete text
+create table mainschema.laureate_info(
+	laureate_info_id serial Primary Key,
+	birth_date date,
+	birth_city text,
+	birth_country text,
+	death_date date,
+	death_city text,
+	death_country text
 );
+
+create table mainschema.human_dimension(
+	human_id serial Primary Key,
+	full_name text,
+	laureate_info_id int references mainschema.laureate_info(laureate_info_id)
+)
 
 create table mainschema.medal_dimension(
 	medal_id serial Primary Key,
@@ -85,17 +96,6 @@ create table mainschema.medal_dimension(
 create table mainschema.category_dimension(
 	category_id serial Primary Key,
 	category text
-);
-
-create table mainschema.laureate_dimension(
-	laureate_id serial Primary Key,
-	full_name text,
-	birth_date date,
-	birth_city text,
-	birth_country text,
-	death_date date,
-	death_city text,
-	death_country text
 );
 
 create table mainschema.laureate_type_dimension(
@@ -118,10 +118,9 @@ create table mainschema.fact_table(
 	location_id int NOT NULL references mainschema.location_dimension(location_id),
 	gender_id int references mainschema.gender_dimension(gender_id),
 	sport_id int references mainschema.sport_dimension(sport_id),
-	athlete_id int references mainschema.athlete_dimension(athlete_id),
+	human_id int references mainschema.human_dimension(human_id),
 	medal_id int references mainschema.medal_dimension(medal_id),
 	category_id int references mainschema.category_dimension(category_id),
-	laureate_id int references mainschema.laureate_dimension(laureate_id),
 	laureate_type_id int references mainschema.laureate_type_dimension(laureate_type_id),
 	organization_id int references mainschema.organization_dimension(organization_id),
 	fact_type text,

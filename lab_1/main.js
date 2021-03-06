@@ -14,6 +14,6 @@ app.get('/', async (req, res) => {
 });
 
 (async () => {
-    const data = await initialLoadPopulation();
+    const data = await initialLoad();
     console.log('END');
 })();
