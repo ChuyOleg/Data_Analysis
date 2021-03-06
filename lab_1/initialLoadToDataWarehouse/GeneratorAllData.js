@@ -4,68 +4,83 @@ const getUniqueData = require('./getDestinctDataFromDB');
 
 class GenerateAllData {
 
-    async getTimeData() {
+    async getTimeData(table) {
 
-        const uniqueTime = await getUniqueData('public.population', 'time');
-        const columnNames = 'year';
+        if (table != 'population' && table != 'tournaments' && table != 'nobel_laureates') {
+            throw new Error(`${table} isn't exist. Check arguments!`);
+        }
+
+        const oldColumnNames = (table === 'population') ? 'time' : 'year';
+        const uniqueTime = await getUniqueData(`public.${table}`, oldColumnNames);
+        const newColumnNames = 'year';
         
-        return { uniqueTime, columnNames };
+        return [ uniqueTime, newColumnNames, oldColumnNames ];
     }
 
-    async getLocationData() {
+    async getLocationData(table) {
         
-        const uniqueCountries = await getUniqueData('public.population', 'location');
-        const columnNames = 'location';
-        
-        return { uniqueCountries, columnNames };
+        if (table != 'population' && table != 'tournaments' && table != 'nobel_laureates') {
+            throw new Error(`${table} isn't exist. Check arguments!`);
+        }
+
+        const newColumnNames = 'location';
+        let oldColumnNames;
+
+        if (table === 'population') oldColumnNames = 'location';
+        else if (table === 'tournaments') oldColumnNames = 'country';
+        else oldColumnNames = 'birth_country';
+   
+        const uniqueCountries = await getUniqueData(`public.${table}`, 'location');
+
+        return [ uniqueCountries, newColumnNames, oldColumnNames ];
     }
 
     async getGenderData() {
         
         const uniqueGender = ['male', 'female', 'total'];
-        const columnNames = 'gender';
+        const newColumnNames = 'gender';
         
-        return { uniqueGender, columnNames };
+        return [ uniqueGender, newColumnNames ];
     }
 
     async getSportData() {
         
         const uniqueSports = await getUniqueData('public.tournaments', 'sport', 'discipline', 'event');
-        const columnNames = 'sport, discipline, event';
+        const newColumnNames = 'sport, discipline, event';
         
-        return { uniqueSports, columnNames };
+        return [ uniqueSports, newColumnNames ];
     }
 
     async getMedalData() {
         
         const uniqueMedals = await getUniqueData('public.tournaments', 'medal');
-        const columnNames = 'medal';
+        const newColumnNames = 'medal';
         
-        return { uniqueMedals, columnNames };
+        return [ uniqueMedals, newColumnNames ];
     }
 
     async getCategoryData() {
         
         const uniqueCategories = await getUniqueData('public.nobel_laureates', 'category');
-        const columnNames = 'category';
+        const newColumnNames = 'category';
         
-        return { uniqueCategories, columnNames };
+        return [ uniqueCategories, newColumnNames ];
     }
 
     async getOrganizationData() {
         
         const uniqueOrganizations = await getUniqueData('public.nobel_laureates', 'organization_name', 'organization_city', 'organization_country');
-        const columnNames = 'organization_name, organization_city, organization_country';
+        const newColumnNames = 'organization_name, organization_city, organization_country';
         
-        return { uniqueOrganizations, columnNames };
+        return [ uniqueOrganizations, newColumnNames ];
     }
 
     async getLaureateTypeData() {
         
         const uniqueLaureateTypes = await getUniqueData('public.nobel_laureates', 'laureate_type');
-        const columnNames = 'laureate_type';
+        const newColumnNames = 'laureate_type';
         
-        return { uniqueLaureateTypes, columnNames };
+        return [ uniqueLaureateTypes, newColumnNames ];
     }
 
     async getHumanData() {
@@ -74,16 +89,16 @@ class GenerateAllData {
         const uniqueLaureates = await getUniqueData('public.nobel_laureates', 'birth_date', 'birth_city', 'birth_country', 'death_date', 'death_city', 'death_country'); 
         
         const uniqueHumans = uniqueAthletes.concat(uniqueLaureates);
-        const columnNames = 'full_name, laureate_info_id'
+        const newColumnNames = 'full_name, laureate_info_id'
         
-        return { uniqueHumans, columnNames };
+        return [ uniqueHumans, newColumnNames ];
     }
 
     async getLaureateInfoColumns() {
 
-        const columnNames = 'birth_date, birth_city, birth_country, death_data, death_city, death_country';
+        const newColumnNames = 'birth_date, birth_city, birth_country, death_data, death_city, death_country';
         
-        return columnNames;
+        return newColumnNames;
     }
 
 };

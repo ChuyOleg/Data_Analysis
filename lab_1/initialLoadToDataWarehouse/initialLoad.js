@@ -1,15 +1,11 @@
 "use strict";
 
 const db = require('../db');
-const validData = require('./validData');
 const insertDataIntoTables = require('./insertDataIntoTables');
 
 const initialLoad = async () => {
 
-
-
-    await insertDataIntoTables('sport');
-
+    await insertDataIntoTables('tournaments', 'sport');
 
     // for (const obj of uniqueTime) {        
         
