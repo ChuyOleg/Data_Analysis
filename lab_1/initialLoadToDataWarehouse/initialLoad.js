@@ -5,7 +5,19 @@ const insertDataIntoTables = require('./insertDataIntoTables');
 
 const initialLoad = async () => {
 
-    await insertDataIntoTables('tournaments', 'sport');
+    // good
+    //  await insertDataIntoTables('population', 'time');
+
+    // good
+    //  await insertDataIntoTables('tournaments', 'time');
+
+    // good
+    //  await insertDataIntoTables('nobel_laureates', 'time');
+
+    // good
+    // await insertDataIntoTables(null, 'gender');
+
+    // await insertDataIntoTables('tournaments', 'sport');
 
     // for (const obj of uniqueTime) {        
         

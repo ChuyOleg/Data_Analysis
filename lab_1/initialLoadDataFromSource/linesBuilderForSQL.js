@@ -2,10 +2,6 @@
 
 class LinesBuilder {
     
-    constructor(tableName) {
-        this.tableName = tableName;
-    }
-
     createArgumentsLine(data) {
         const fields = Object.keys(data);
 

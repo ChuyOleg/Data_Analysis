@@ -10,8 +10,8 @@ class GenerateAllData {
             throw new Error(`${table} isn't exist. Check arguments!`);
         }
 
-        const oldColumnNames = (table === 'population') ? 'time' : 'year';
-        const uniqueTime = await getUniqueData(`public.${table}`, oldColumnNames);
+        const oldColumnNames = (table === 'population') ? ['time'] : ['year'];
+        const uniqueTime = await getUniqueData(`public.${table}`, oldColumnNames[0]);
         const newColumnNames = 'year';
         
         return [ uniqueTime, newColumnNames, oldColumnNames ];
@@ -26,18 +26,18 @@ class GenerateAllData {
         const newColumnNames = 'location';
         let oldColumnNames;
 
-        if (table === 'population') oldColumnNames = 'location';
-        else if (table === 'tournaments') oldColumnNames = 'country';
-        else oldColumnNames = 'birth_country';
+        if (table === 'population') oldColumnNames = ['location'];
+        else if (table === 'tournaments') oldColumnNames = ['country'];
+        else oldColumnNames = ['birth_country'];
    
-        const uniqueCountries = await getUniqueData(`public.${table}`, 'location');
+        const uniqueCountries = await getUniqueData(`public.${table}`, oldColumnNames[0]);
 
         return [ uniqueCountries, newColumnNames, oldColumnNames ];
     }
 
-    async getGenderData() {
+    getGenderData() {
         
-        const uniqueGender = ['male', 'female', 'total'];
+        const uniqueGender = [{ gender: 'male' }, { gender: 'female' }, { gender: 'total' }];
         const newColumnNames = 'gender';
         
         return [ uniqueGender, newColumnNames ];

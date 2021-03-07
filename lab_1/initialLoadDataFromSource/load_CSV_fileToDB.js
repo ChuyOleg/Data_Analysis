@@ -8,7 +8,7 @@ const LinesBuilder = require('./linesBuilderForSQL');
 const loadData_CSV_FromSource = async (file, tableName) => {
 
     const tableNameLowerCase = tableName.toLowerCase();
-    const linesBuilder = new LinesBuilder(tableNameLowerCase);
+    const linesBuilder = new LinesBuilder();
 
     let argumentsLine = null;
 
