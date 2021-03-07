@@ -86,7 +86,7 @@ class GenerateAllData {
     async getHumanData() {
         
         const uniqueAthletes = await getUniqueData('public.tournaments', 'athlete');
-        const uniqueLaureates = await getUniqueData('public.nobel_laureates', 'birth_date', 'birth_city', 'birth_country', 'death_date', 'death_city', 'death_country'); 
+        const uniqueLaureates = await getUniqueData('public.nobel_laureates', 'full_name', 'birth_date', 'birth_city', 'birth_country', 'death_date', 'death_city', 'death_country'); 
         
         const uniqueHumans = uniqueAthletes.concat(uniqueLaureates);
         const newColumnNames = 'full_name, laureate_info_id'

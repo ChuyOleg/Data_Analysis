@@ -74,10 +74,10 @@ create table mainschema.sport_dimension(
 
 create table mainschema.laureate_info(
 	laureate_info_id serial Primary Key,
-	birth_date date,
+	birth_date text,
 	birth_city text,
 	birth_country text,
-	death_date date,
+	death_date text,
 	death_city text,
 	death_country text
 );

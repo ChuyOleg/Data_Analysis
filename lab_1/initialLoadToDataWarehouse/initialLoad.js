@@ -17,39 +17,31 @@ const initialLoad = async () => {
     // good
     // await insertDataIntoTables(null, 'gender');
 
+    // good
     // await insertDataIntoTables('tournaments', 'sport');
 
-    // for (const obj of uniqueTime) {        
-        
-    //     const copyTime = await db.query(`select year from mainschema.time_dimension where year = ${obj['time']}`);
-        
-    //     if (copyTime.rows.length === 0) {
-    //         await db.query(`insert into mainschema.time_dimension(year) values(${obj['time']})`)
-    //     }
+    // good
+    // await insertDataIntoTables('tournaments', 'medal');
 
-    // };
+    // good
+    // await insertDataIntoTables('nobel_laureates', 'category');
 
-    // for (const obj of uniqueCountries) {
+    // good
+    // await insertDataIntoTables('nobel_laureates', 'organization');
 
-    //     const location = validData(obj['location']);
+    // good
+    // await insertDataIntoTables('nobel_laureates', 'laureate_type');
 
-    //     const copyLocation = await db.query(`select location from mainschema.location_dimension where location like '${location}'`);
+    // good 
+    // await insertDataIntoTables('population', 'location');
 
-    //     if (copyLocation.rows.length === 0) {
-    //         await db.query(`insert into mainschema.location_dimension(location) values('${location}')`);
-    //     }
+    // good
+    // await insertDataIntoTables('tournaments', 'location');
 
-    // }
+    // good
+    // await insertDataIntoTables('nobel_laureates', 'location');
 
-    // for (const gender of genderArr) {
-
-    //     const copyGender = await db.query(`select gender from mainschema.gender_dimension where gender like '${gender}'`);
-
-    //     if (copyGender.rows.length === 0) {
-    //         await db.query(`insert into mainschema.gender_dimension(gender) values('${gender}')`);
-    //     }
-
-    // }
+    await insertDataIntoTables(null, 'human');
 };
 
 module.exports = initialLoad;
