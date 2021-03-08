@@ -82,11 +82,16 @@ const insertDataIntoTable = async (inputTable, outputTable) => {
         }    
     } else {
         for (const obj of rows) {
+
             for (const field in obj) {
                 if (obj[field] != null) obj[field] = validator.validQuotes(obj[field]);
             }
+
+            const human = (Object.keys(obj).length > 1) ? 'laureate' : 'athlete';
+            const name = (human === 'laureate') ? 'full_name' : 'athlete';
             let condition = '';
-            if (Object.keys(obj).length > 1) {
+            let copyLaureateInfo;
+            if (human === 'laureate') {
                 condition = `where birth_date like '${obj['birth_date']}'
                     and birth_city like '${obj['birth_city']}'
                     and birth_country like '${obj['birth_country']}'
@@ -94,9 +99,31 @@ const insertDataIntoTable = async (inputTable, outputTable) => {
                     and death_city like '${obj['death_city']}'
                     and death_country like '${obj['death_country']}'
                 `;
+                copyLaureateInfo = await db.query(`select laureate_info_id from mainschema.laureate_info ${condition}`);
+            } else {
+                copyLaureateInfo = {rows: [{ 'laureate_info_id': null }]}
             }
 
-            const copyLaureateInfo = await db.query(`select * from mainschema.laureate_info ${condition}`);
+
+            if (human === 'laureate' && copyLaureateInfo.rows.length === 0) {
+                await db.query(`insert into mainschema.laureate_info(birth_date, birth_city, birth_country, death_date, death_city, death_country) 
+                    values('${obj['birth_date']}', '${obj['birth_city']}', '${obj['birth_country']}', '${obj['death_date']}', '${obj['death_city']}', '${obj['death_country']}')
+                `);
+                copyLaureateInfo = await db.query(`select laureate_info_id from mainschema.laureate_info ${condition}`);
+            };
+
+            const laureateInfoID = copyLaureateInfo.rows[0]['laureate_info_id'];
+
+            let copyHuman;
+            if (human === 'athlete') {
+                copyHuman = await db.query(`select * from mainschema.human_dimension where full_name like '${obj[name]}' and laureate_info_id is null`); 
+            } else {
+                copyHuman = await db.query(`select * from mainschema.human_dimension where full_name like '${obj[name]}' and laureate_info_id = ${laureateInfoID}`); 
+            }
+
+            if (copyHuman.rows.length === 0) {
+                await db.query(`insert into mainschema.human_dimension(full_name, laureate_info_id) values('${obj[name]}', ${laureateInfoID})`);
+            }
 
         }
     }
