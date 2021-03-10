@@ -1,6 +1,7 @@
 "use strict";
 
-const getUniqueData = require('./getDestinctDataFromDB');
+const DataRecipient = require('./DataRecipientFromDB');
+const dataRecipient = new DataRecipient();
 
 class GenerateAllData {
 
@@ -11,7 +12,7 @@ class GenerateAllData {
         }
 
         const oldColumnNames = (table === 'population') ? ['time'] : ['year'];
-        const uniqueTime = await getUniqueData(`public.${table}`, oldColumnNames[0]);
+        const uniqueTime = await dataRecipient.getRows(`public.${table}`, oldColumnNames[0]);
         const newColumnNames = 'year';
         
         return [ uniqueTime, newColumnNames, oldColumnNames ];
@@ -30,7 +31,7 @@ class GenerateAllData {
         else if (table === 'tournaments') oldColumnNames = ['country'];
         else oldColumnNames = ['birth_country'];
    
-        const uniqueCountries = await getUniqueData(`public.${table}`, oldColumnNames[0]);
+        const uniqueCountries = await dataRecipient.getRows(`public.${table}`, oldColumnNames[0]);
 
         return [ uniqueCountries, newColumnNames, oldColumnNames ];
     }
@@ -45,7 +46,7 @@ class GenerateAllData {
 
     async getSportData() {
         
-        const uniqueSports = await getUniqueData('public.tournaments', 'sport', 'discipline', 'event');
+        const uniqueSports = await dataRecipient.getRows('public.tournaments', 'sport', 'discipline', 'event');
         const newColumnNames = 'sport, discipline, event';
         
         return [ uniqueSports, newColumnNames ];
@@ -53,7 +54,7 @@ class GenerateAllData {
 
     async getMedalData() {
         
-        const uniqueMedals = await getUniqueData('public.tournaments', 'medal');
+        const uniqueMedals = await dataRecipient.getRows('public.tournaments', 'medal');
         const newColumnNames = 'medal';
         
         return [ uniqueMedals, newColumnNames ];
@@ -61,7 +62,7 @@ class GenerateAllData {
 
     async getCategoryData() {
         
-        const uniqueCategories = await getUniqueData('public.nobel_laureates', 'category');
+        const uniqueCategories = await dataRecipient.getRows('public.nobel_laureates', 'category');
         const newColumnNames = 'category';
         
         return [ uniqueCategories, newColumnNames ];
@@ -69,7 +70,7 @@ class GenerateAllData {
 
     async getOrganizationData() {
         
-        const uniqueOrganizations = await getUniqueData('public.nobel_laureates', 'organization_name', 'organization_city', 'organization_country');
+        const uniqueOrganizations = await dataRecipient.getRows('public.nobel_laureates', 'organization_name', 'organization_city', 'organization_country');
         const newColumnNames = 'organization_name, organization_city, organization_country';
         
         return [ uniqueOrganizations, newColumnNames ];
@@ -77,7 +78,7 @@ class GenerateAllData {
 
     async getLaureateTypeData() {
         
-        const uniqueLaureateTypes = await getUniqueData('public.nobel_laureates', 'laureate_type');
+        const uniqueLaureateTypes = await dataRecipient.getRows('public.nobel_laureates', 'laureate_type');
         const newColumnNames = 'laureate_type';
         
         return [ uniqueLaureateTypes, newColumnNames ];
@@ -85,8 +86,8 @@ class GenerateAllData {
 
     async getHumanData() {
         
-        const uniqueAthletes = await getUniqueData('public.tournaments', 'athlete');
-        const uniqueLaureates = await getUniqueData('public.nobel_laureates', 'full_name', 'birth_date', 'birth_city', 'birth_country', 'death_date', 'death_city', 'death_country'); 
+        const uniqueAthletes = await dataRecipient.getRows('public.tournaments', 'athlete');
+        const uniqueLaureates = await dataRecipient.getRows('public.nobel_laureates', 'full_name', 'birth_date', 'birth_city', 'birth_country', 'death_date', 'death_city', 'death_country'); 
         
         const uniqueHumans = uniqueAthletes.concat(uniqueLaureates);
         const newColumnNames = 'full_name, laureate_info_id'

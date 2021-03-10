@@ -2,12 +2,12 @@
 
 const db = require('../db');
 const GeneratorAllData = require('./GeneratorAllData');
-const Validator = require('./Validator');
 const Builder = require('./Builder');
+const DataRecipient = require('./DataRecipientFromDB');
 
 const genereratorAllData = new GeneratorAllData();
-const validator = new Validator();
 const builder = new Builder();
+const dataRecipient = new DataRecipient();
 
 const insertDataIntoTable = async (inputTable, outputTable) => {
     
@@ -51,30 +51,21 @@ const insertDataIntoTable = async (inputTable, outputTable) => {
     const newArgumentsArr = argumentsLine.split(', ');
     const oldArgumentsArr = data[2] || newArgumentsArr;
 
-    if (outputTable != 'human' && outputTable != 'location') {
+    if (outputTable != 'human') {
         
         for (const obj of rows) {
 
             const condition = builder.buildConditionForSearchingCopy(newArgumentsArr, oldArgumentsArr, obj);
     
-            const copyData = await db.query(`select ${argumentsLine} from mainschema.${outputTable}_dimension ${condition}`);
-            const copyRows = copyData.rows;
+            const copyRows = await dataRecipient.getCopy(inputTable, outputTable, argumentsLine, condition, obj);
 
             if (copyRows.length === 0) {
                 const values = builder.BuildValuesLineForInsert(obj, oldArgumentsArr);
                 await db.query(`insert into mainschema.${outputTable}_dimension(${argumentsLine}) values(${values})`);
             }
 
-            // let copy;
-            // if (inputTable === 'tournaments' && outputTable === 'location') {
-            //     copy = await db.query(`select location from mainschema.location_dimension where lower(location) like lower('${obj['country']}%')`);
-            // } else if (inputTable === 'nobel_laureates' && outputTable === 'location') {
-            //     copy  = await db.query(`select location from mainschema.location_dimension where lower(location) like lower('${obj['birth_country']}')`);
-            // } else {
-            //     copy = await db.query(`select ${argumentsLine} from mainschema.${outputTable}_dimension ${condition}`);
-            // }
+        }
     
-        }    
     } else {
         // for (const obj of rows) {
 
@@ -117,7 +108,7 @@ const insertDataIntoTable = async (inputTable, outputTable) => {
         //     }
 
         //     if (copyHuman.rows.length === 0) {
-        //         await db.query(`insert into mainschema.human_dimension(full_name, laureate_info_id) values('${obj[name]}', ${laureateInfoID})`);
+        //         await db.quexry(`insert into mainschema.human_dimension(full_name, laureate_info_id) values('${obj[name]}', ${laureateInfoID})`);
         //     }
 
         // }
