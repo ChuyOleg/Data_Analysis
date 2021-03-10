@@ -4,9 +4,11 @@ const db = require('../db');
 const GeneratorAllData = require('./GeneratorAllData');
 const Builder = require('./Builder');
 const DataRecipient = require('./DataRecipientFromDB');
+const Validator = require('./Validator');
 
 const genereratorAllData = new GeneratorAllData();
 const builder = new Builder();
+const validator = new Validator();
 const dataRecipient = new DataRecipient();
 
 const insertDataIntoTable = async (inputTable, outputTable) => {
@@ -43,10 +45,9 @@ const insertDataIntoTable = async (inputTable, outputTable) => {
             break;
         default:
             throw new Error(`${outputTable} isn't exist. Check arguments !`);
-            break;
     }
 
-    const rows = data[0];
+    const rows = validator.validArrayOfObjects(data[0]);
     const argumentsLine = data[1];
     const newArgumentsArr = argumentsLine.split(', ');
     const oldArgumentsArr = data[2] || newArgumentsArr;
@@ -67,29 +68,18 @@ const insertDataIntoTable = async (inputTable, outputTable) => {
         }
     
     } else {
-        // for (const obj of rows) {
+        for (const obj of rows) {
 
-        //     for (const field in obj) {
-        //         if (obj[field] != null) obj[field] = validator.validQuotes(obj[field]);
-        //     }
+            const human = (Object.keys(obj).length > 1) ? 'laureate' : 'athlete';
+            const name = (human === 'laureate') ? 'full_name' : 'athlete';
 
-        //     const human = (Object.keys(obj).length > 1) ? 'laureate' : 'athlete';
-        //     const name = (human === 'laureate') ? 'full_name' : 'athlete';
-        //     let condition = '';
-        //     let copyLaureateInfo;
-        //     if (human === 'laureate') {
-        //         condition = `where birth_date like '${obj['birth_date']}'
-        //             and birth_city like '${obj['birth_city']}'
-        //             and birth_country like '${obj['birth_country']}'
-        //             and death_date like '${obj['death_date']}'
-        //             and death_city like '${obj['death_city']}'
-        //             and death_country like '${obj['death_country']}'
-        //         `;
-        //         copyLaureateInfo = await db.query(`select laureate_info_id from mainschema.laureate_info ${condition}`);
-        //     } else {
-        //         copyLaureateInfo = {rows: [{ 'laureate_info_id': null }]}
-        //     }
+            if (human === 'athlete') continue;
 
+            const laureateInfoLine = genereratorAllData.getLaureateInfoColumns();
+            const laureateInfoArr = laureateInfoLine.split(', ');
+
+            const laureateInfoCondition = builder.buildConditionForSearchingCopy(laureateInfoArr, laureateInfoArr, obj);
+            const copyLaureateInfoRows = await dataRecipient.getLaureateInfoCopy(laureateInfoCondition, human);
 
         //     if (human === 'laureate' && copyLaureateInfo.rows.length === 0) {
         //         await db.query(`insert into mainschema.laureate_info(birth_date, birth_city, birth_country, death_date, death_city, death_country) 
@@ -111,7 +101,7 @@ const insertDataIntoTable = async (inputTable, outputTable) => {
         //         await db.quexry(`insert into mainschema.human_dimension(full_name, laureate_info_id) values('${obj[name]}', ${laureateInfoID})`);
         //     }
 
-        // }
+        }
     }
     
 

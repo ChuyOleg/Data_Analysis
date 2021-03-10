@@ -21,7 +21,7 @@ const initialLoad = async () => {
     await insertDataIntoTables('tournaments', 'sport');
 
     // good
-    await insertDataIntoTables('tournaments', 'medal');
+    // await insertDataIntoTables('tournaments', 'medal');
 
     // good
     // await insertDataIntoTables('nobel_laureates', 'category');
@@ -41,7 +41,7 @@ const initialLoad = async () => {
     // good
     // await insertDataIntoTables('nobel_laureates', 'location');
 
-    // await insertDataIntoTables(null, 'human');
+    await insertDataIntoTables(null, 'human');
 };
 
 module.exports = initialLoad;

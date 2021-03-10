@@ -1,9 +1,5 @@
 "use strict";
 
-const Validator = require('./Validator');
-
-const validator = new Validator();
-
 class Builder {
 
     buildConditionForSearchingCopy(newFieldNames, oldFieldNames, obj) {
@@ -12,7 +8,7 @@ class Builder {
         
         for (let index = 0; index < newFieldNames.length; index++) {
 
-            const data = validator.validQuotes(obj[oldFieldNames[index]]);
+            const data = obj[oldFieldNames[index]];
 
             const equalizer = (newFieldNames[index] === 'year') ? '=' : 'like';
 
@@ -31,10 +27,11 @@ class Builder {
     BuildValuesLineForInsert(data, fields) {
         let line = '';
         for (const field of fields) {
+            const value = data[field];
             if (fields.indexOf(field) === 0) {
-                line += `'${data[field]}'`;
+                line += `'${value}'`;
             } else {
-                line += `, '${data[field]}'`;
+                line += `, '${value}'`;
             }
         }
         return line;

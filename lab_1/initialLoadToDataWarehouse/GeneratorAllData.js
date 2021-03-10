@@ -95,9 +95,9 @@ class GenerateAllData {
         return [ uniqueHumans, newColumnNames ];
     }
 
-    async getLaureateInfoColumns() {
+    getLaureateInfoColumns() {
 
-        const newColumnNames = 'birth_date, birth_city, birth_country, death_data, death_city, death_country';
+        const newColumnNames = 'birth_date, birth_city, birth_country, death_date, death_city, death_country';
         
         return newColumnNames;
     }

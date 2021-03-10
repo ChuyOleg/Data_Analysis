@@ -1,6 +1,8 @@
 "use strict";
 
 const db = require('../db');
+const Validator = require('./Validator');
+const validator = new Validator();
 
 class DataRecipient {
 
@@ -20,15 +22,16 @@ class DataRecipient {
             return dataCopy.rows;
         
         } else if (outputTable === 'location') {
-            
             if (inputTable === 'population') {
                 const copyData = await db.query(`select ${argumentsLine} from mainschema.${outputTable}_dimension ${condition}`);
                 return copyData.rows;
             } else if (inputTable === 'tournaments') {
-                const copyData = await db.query(`select location from mainschema.location_dimension where lower(location) like lower('${obj['country']}%')`);
+                const location = obj['country'];
+                const copyData = await db.query(`select location from mainschema.location_dimension where lower(location) like lower('${location}%')`);
                 return copyData.rows;
             } else if (inputTable === 'nobel_laureates') {
-                const copyData = await db.query(`select location from mainschema.location_dimension where lower(location) like lower('${obj['birth_country']}')`);
+                const location = obj['birth_country'];
+                const copyData = await db.query(`select location from mainschema.location_dimension where lower(location) like lower('${location}')`);
                 return copyData.rows;
             } else {
                 throw new Error('Incorrect name of the input_table in the inserting into location_dimension. Check arguments!');
@@ -44,13 +47,21 @@ class DataRecipient {
         const name = (human === 'laureate') ? 'full_name' : 'athlete';
             
         if (human === 'athlete') {
-            const copyData = await db.query(`select * from mainschema.human_dimension where full_name like '${obj[name]}' and laureate_info_id is null`); 
+            const name = obj[name];
+            const copyData = await db.query(`select * from mainschema.human_dimension where full_name like '${name}' and laureate_info_id is null`); 
             return copyData.rows;
         } else {
-            const copyData = await db.query(`select * from mainschema.human_dimension where full_name like '${obj[name]}' and laureate_info_id = ${laureateInfoID}`); 
+            const name = obj[name];
+            const copyData = await db.query(`select * from mainschema.human_dimension where full_name like '${name}' and laureate_info_id = ${laureateInfoID}`); 
             return copyData.rows;
         }
     
+    }
+
+    async getLaureateInfoCopy(condition, human) {
+        if (human === 'athlete') return {rows: [{ 'laureate_info_id': null }]};
+        const copyLaureateInfo = await db.query(`select laureate_info_id from mainschema.laureate_info ${condition}`);
+        return copyLaureateInfo.rows;
     }
 
 }
