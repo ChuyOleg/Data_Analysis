@@ -3,19 +3,8 @@
 class Validator {
 
     validQuotes(data) {
+        if (data === null || typeof(data) === 'string') return data;
         return data.replace(/'/gi, "''");
-    }
-
-    createValuesLine(data, fields) {
-        let line = '';
-        for (const field of fields) {
-            if (fields.indexOf(field) === 0) {
-                line += `'${data[field]}'`;
-            } else {
-                line += `, '${data[field]}'`;
-            }
-        }
-        return line;
     }
 
 };
