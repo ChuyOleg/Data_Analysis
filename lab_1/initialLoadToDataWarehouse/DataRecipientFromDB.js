@@ -47,19 +47,19 @@ class DataRecipient {
         const name = (human === 'laureate') ? 'full_name' : 'athlete';
             
         if (human === 'athlete') {
-            const name = obj[name];
-            const copyData = await db.query(`select * from mainschema.human_dimension where full_name like '${name}' and laureate_info_id is null`); 
+            const full_name = obj[name];
+            const copyData = await db.query(`select * from mainschema.human_dimension where full_name like '${full_name}' and laureate_info_id is null`); 
             return copyData.rows;
         } else {
-            const name = obj[name];
-            const copyData = await db.query(`select * from mainschema.human_dimension where full_name like '${name}' and laureate_info_id = ${laureateInfoID}`); 
+            const full_name = obj[name];
+            const copyData = await db.query(`select * from mainschema.human_dimension where full_name like '${full_name}' and laureate_info_id = ${laureateInfoID}`); 
             return copyData.rows;
         }
     
     }
 
     async getLaureateInfoCopy(condition, human) {
-        if (human === 'athlete') return {rows: [{ 'laureate_info_id': null }]};
+        if (human === 'athlete') return [{ 'laureate_info_id': null }];
         const copyLaureateInfo = await db.query(`select laureate_info_id from mainschema.laureate_info ${condition}`);
         return copyLaureateInfo.rows;
     }

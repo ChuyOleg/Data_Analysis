@@ -61,45 +61,38 @@ const insertDataIntoTable = async (inputTable, outputTable) => {
             const copyRows = await dataRecipient.getCopy(inputTable, outputTable, argumentsLine, condition, obj);
 
             if (copyRows.length === 0) {
-                const values = builder.BuildValuesLineForInsert(obj, oldArgumentsArr);
+                const values = builder.buildValuesLineForInsert(obj, oldArgumentsArr);
                 await db.query(`insert into mainschema.${outputTable}_dimension(${argumentsLine}) values(${values})`);
             }
 
         }
     
     } else {
+
         for (const obj of rows) {
 
             const human = (Object.keys(obj).length > 1) ? 'laureate' : 'athlete';
             const name = (human === 'laureate') ? 'full_name' : 'athlete';
 
-            if (human === 'athlete') continue;
-
             const laureateInfoLine = genereratorAllData.getLaureateInfoColumns();
             const laureateInfoArr = laureateInfoLine.split(', ');
 
             const laureateInfoCondition = builder.buildConditionForSearchingCopy(laureateInfoArr, laureateInfoArr, obj);
-            const copyLaureateInfoRows = await dataRecipient.getLaureateInfoCopy(laureateInfoCondition, human);
+            let copyLaureateInfoRows = await dataRecipient.getLaureateInfoCopy(laureateInfoCondition, human);
 
-        //     if (human === 'laureate' && copyLaureateInfo.rows.length === 0) {
-        //         await db.query(`insert into mainschema.laureate_info(birth_date, birth_city, birth_country, death_date, death_city, death_country) 
-        //             values('${obj['birth_date']}', '${obj['birth_city']}', '${obj['birth_country']}', '${obj['death_date']}', '${obj['death_city']}', '${obj['death_country']}')
-        //         `);
-        //         copyLaureateInfo = await db.query(`select laureate_info_id from mainschema.laureate_info ${condition}`);
-        //     };
+            if (human === 'laureate' && copyLaureateInfoRows.length === 0) {
+                const values = builder.buildValuesLineForInsert(obj, laureateInfoArr);
+                await db.query(`insert into mainschema.laureate_info(${laureateInfoLine}) values(${values})`);
+                copyLaureateInfoRows = await dataRecipient.getLaureateInfoCopy(laureateInfoCondition, human);
+            }
 
-        //     const laureateInfoID = copyLaureateInfo.rows[0]['laureate_info_id'];
+            const laureateInfoID = copyLaureateInfoRows[0]['laureate_info_id'];
 
-        //     let copyHuman;
-        //     if (human === 'athlete') {
-        //         copyHuman = await db.query(`select * from mainschema.human_dimension where full_name like '${obj[name]}' and laureate_info_id is null`); 
-        //     } else {
-        //         copyHuman = await db.query(`select * from mainschema.human_dimension where full_name like '${obj[name]}' and laureate_info_id = ${laureateInfoID}`); 
-        //     }
+            const copyHuman = await dataRecipient.getHumanCopy(obj, laureateInfoID);
 
-        //     if (copyHuman.rows.length === 0) {
-        //         await db.quexry(`insert into mainschema.human_dimension(full_name, laureate_info_id) values('${obj[name]}', ${laureateInfoID})`);
-        //     }
+            if (copyHuman.length === 0) {
+                await db.query(`insert into mainschema.human_dimension(${argumentsLine}) values('${obj[name]}', ${laureateInfoID})`);
+            }
 
         }
     }

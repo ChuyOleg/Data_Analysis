@@ -24,7 +24,7 @@ class Builder {
     
     }
 
-    BuildValuesLineForInsert(data, fields) {
+    buildValuesLineForInsert(data, fields) {
         let line = '';
         for (const field of fields) {
             const value = data[field];
