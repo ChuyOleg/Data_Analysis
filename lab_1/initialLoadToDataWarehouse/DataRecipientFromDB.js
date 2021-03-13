@@ -64,6 +64,11 @@ class DataRecipient {
         return copyLaureateInfo.rows;
     }
 
+    async getInputTableData(table) {
+        const data = await db.query(`select * from public.${table}`);
+        return data.rows;
+    }
+
 }
 
 module.exports = DataRecipient;

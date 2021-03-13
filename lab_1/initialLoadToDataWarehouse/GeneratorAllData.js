@@ -13,9 +13,10 @@ class GenerateAllData {
 
         const oldColumnNames = (table === 'population') ? ['time'] : ['year'];
         const uniqueTime = await dataRecipient.getRows(`public.${table}`, oldColumnNames[0]);
+        const uniqueFilterTime = uniqueTime.filter(obj => obj[oldColumnNames[0]] < 2021);
         const newColumnNames = 'year';
         
-        return [ uniqueTime, newColumnNames, oldColumnNames ];
+        return [ uniqueFilterTime, newColumnNames, oldColumnNames ];
     }
 
     async getLocationData(table) {
