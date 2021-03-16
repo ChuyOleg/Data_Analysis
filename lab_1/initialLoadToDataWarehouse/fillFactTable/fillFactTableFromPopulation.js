@@ -35,7 +35,7 @@ const fillFromPopulation = async () => {
             total: obj['poptotal']
         }
 
-        const location_id = await dataRecipient.getLocationIDFromDIM(obj['location']);
+        const location_id = await dataRecipient.getLocationIDFromDIM(obj['location'], 'population');
         const time_id = await dataRecipient.getTimeIDFromDIM(obj['time']);
 
         for (const gender of genders) {
@@ -46,6 +46,7 @@ const fillFromPopulation = async () => {
             )`);
         }
 
+        // CHECK FOR COPY
         await db.query(`insert into mainschema.fact_table(
             time_id, location_id, fact_type, pop_density
         ) values(

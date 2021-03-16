@@ -16,6 +16,19 @@ class ExtraData {
         human: [null],
     };
 
+    dimColumns = {
+        time: ['year'],
+        gender: ['gender'],
+        sport: ['sport', 'discipline', 'event'],
+        medal: ['medal'],
+        category: ['category'],
+        organization: ['organization_name', 'organization_city', 'organization_country'],
+        laureate_type: ['laureate_type'],
+        location: ['location'],
+        human: ['full_name', 'laureate_info_id'],
+        'laureate_info': ['birth_date', 'birth_city', 'birth_country', 'death_date', 'death_city', 'death_country'],
+    };
+
     equalColumns = {
         time: 'year',
         year: 'year',

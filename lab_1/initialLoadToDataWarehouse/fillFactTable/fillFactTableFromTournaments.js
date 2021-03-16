@@ -5,7 +5,7 @@ const db = require('../../db');
 
 const dataRecipient = new DataRecipientFromDB;
 
-const fillFromTournaments = async () => {
+const fillFromTournaments = async (extraData) => {
 
     const tournamentsData = await dataRecipient.getInputTableData('tournaments');
 
@@ -17,27 +17,30 @@ const fillFromTournaments = async () => {
         'total': await dataRecipient.getGenderIDFromDIM('total')
     }
 
-    for (const obj of tournamentsData) {
-
-        await dataRecipient.getSimpleIDFromDim('time', obj);
-        // const location_id = await dataRecipient.getLocationIDFromDIM(obj['country']);
-        // const time_id = await dataRecipient.getTimeIDFromDIM(obj['year']);
-
+    const medals_id = {
+        'Gold': await dataRecipient.getMedalIDFromDim('Gold'),
+        'Silver': await dataRecipient.getMedalIDFromDim('Silver'),
+        'Bronze': await dataRecipient.getMedalIDFromDim('Bronze')
     }
 
-    // const yearData = await db.query(`select * from mainschema.time_dimension`);
-    // const locationData = await db.query(`select * from mainschema.location_dimension`);
-    // const sportData = await db.query(`select * from mainschema.sport_dimension`);
-    // const athleteData = await db.query(`select * from mainschema.human_dimension`);
-    // const genderData = await db.query(`select * from mainschema.gender_dimension`);
-    // const medalData = await db.query(`select * from mainschema.medal_dimension`);
+    for (const obj of tournamentsData) {
 
-    // console.log(locationData.rows[0]);
-    // console.log(sportData.rows[0]);
-    // console.log(athleteData.rows[0]);
-    // console.log(genderData.rows[0]);
-    // console.log(medalData.rows[0]);
+        const sport_id = await dataRecipient.getSportIDFromDim(obj['sport'], obj['discipline'], obj['event']);
+        const location_id = await dataRecipient.getLocationIDFromDIM(obj['country'], 'tournaments');
+        const time_id = await dataRecipient.getTimeIDFromDIM(obj['year']);
+        const human_id = await dataRecipient.getHumanIDFromDim(obj, 'tournaments');
+        const medal_id = medals_id[obj['medal']];
+        const gender_id = (obj['gender'] === 'Men') ? genders_id['male'] : genders_id['female'];
 
+
+        // CHECK FOR COPY
+        await db.query(`insert into mainschema.fact_table(
+            time_id, location_id, fact_type, gender_id, medal_id, sport_id, human_id, win_tournament
+        ) values(
+            ${time_id}, ${location_id}, '${fact_type}', ${gender_id}, ${medal_id}, ${sport_id}, ${human_id}, 'Yes'
+        )`);
+
+    }
 
 };
 

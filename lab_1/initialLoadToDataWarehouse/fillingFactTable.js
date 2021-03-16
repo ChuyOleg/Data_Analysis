@@ -5,11 +5,11 @@ const db = require('../db');
 const fillFromPopulation = require('./fillFactTable/fillFactTableFromPopulation');
 const fillFromTournaments = require('./fillFactTable/fillFactTableFromTournaments');
 
-const fillFactTable = async () => {
+const fillFactTable = async (extraData) => {
 
-    // await fillFromPopulation();
-    await fillFromTournaments();
-    // await fromFromNobelLaureates();
+    await fillFromPopulation(extraData);
+    await fillFromTournaments(extraData);
+    // await fromFromNobelLaureates(extraData);
 
 };
 

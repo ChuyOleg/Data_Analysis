@@ -17,7 +17,7 @@ const initialLoad = async () => {
 
     
 
-    // await fillFactTable();
+    await fillFactTable(extraData);
 
 };
 

@@ -3,9 +3,11 @@
 const db = require('../db');
 const Validator = require('./Validator');
 const Builder = require('./Builder');
+const ExtraData = require('./ExtraData');
 
 const validator = new Validator();
 const builder = new Builder();
+const extraData = new ExtraData();
 
 class DataRecipient {
 
@@ -79,9 +81,17 @@ class DataRecipient {
         return time_id;
     }
 
-    async getLocationIDFromDIM(location) {
-        // think about different inputTables
-        const data = await db.query(`select location_id from mainschema.location_dimension where location like '${location}'`);
+    async getLocationIDFromDIM(location, input_table) {
+        let data;
+        if (input_table === 'population') {
+            data = await db.query(`select location_id from mainschema.location_dimension where location like '${location}'`);
+        } else if (input_table === 'tournaments') {
+            data = await db.query(`select location_id from mainschema.location_dimension where lower(location) like lower('${location}%')`);
+        } else if (input_table === 'nobel_laureates') {
+            data = await db.query(`select location_id from mainschema.location_dimension where lower(location) like lower('${location}')`);
+        } else {
+            throw new Error('DataRecipientFromDB => getLocationIDFromDIm incorrect input_table');
+        }
         const location_id = data.rows[0]['location_id'];
         return location_id;
     }
@@ -92,10 +102,37 @@ class DataRecipient {
         return gender_id;
     }
 
-    async getSimpleIDFromDim(dimName, obj) {
-        const fields = Object.keys(obj);
-        console.log(fields);
-        // const condition = builder.buildConditionForSearchingCopy();
+    async getMedalIDFromDim(medal) {
+        const data = await db.query(`select medal_id from mainschema.medal_dimension where medal like '${medal}'`);
+        const medal_id = data.rows[0]['medal_id'];
+        return medal_id;
+    }
+
+    async getSportIDFromDim(sport, discipline, event) {
+        const data = await db.query(`select sport_id from mainschema.sport_dimension where sport like '${sport}' and discipline like '${discipline}' and event like '${event}'`)
+        const sport_id = data.rows[0]['sport_id'];
+        return sport_id;
+    }
+
+    async getLaureateInfoID(obj) {
+        const argumentsArr = extraData.dimColumns['laureate_info'];
+        const laureateInfoCondition = builder.buildConditionForSearchingCopy(argumentsArr, argumentsArr, obj);
+        let laureateInfoID = await this.getLaureateInfoCopy(laureateInfoCondition, obj);
+        return laureateInfoID[0]['laureate_info_id'];
+    }
+
+    async getHumanIDFromDim(human, input_table) {
+        let data;
+        if (input_table === 'tournaments') {
+            data = await db.query(`select * from mainschema.human_dimension where full_name like '${human['athlete']}' and laureate_info_id is null`);
+        } else if (input_table === 'nobel_laureates') {
+            const laureateInfoID = await this.getLaureateInfoID(human);
+            data = await db.query(`select * from mainschema.human_dimension where full_name like '${human['full_name']}' and laureate_info_id = ${laureateInfoID}`);
+        } else {
+            throw new Error('DataRecipientFromDB => getHumanIDFromDim incorrect input_table');
+        }
+        const human_id = data.rows[0]['human_id'];
+        return human_id;
     }
 
 }
