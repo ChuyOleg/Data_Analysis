@@ -2,7 +2,10 @@
 
 const db = require('../db');
 const Validator = require('./Validator');
+const Builder = require('./Builder');
+
 const validator = new Validator();
+const builder = new Builder();
 
 class DataRecipient {
 
@@ -66,7 +69,33 @@ class DataRecipient {
 
     async getInputTableData(table) {
         const data = await db.query(`select * from public.${table}`);
-        return data.rows;
+        const validData = validator.validArrayOfObjects(data.rows);
+        return validData;
+    }
+
+    async getTimeIDFromDIM(year) {
+        const data = await db.query(`select time_id from mainschema.time_dimension where year = ${year}`);
+        const time_id = data.rows[0]['time_id'];
+        return time_id;
+    }
+
+    async getLocationIDFromDIM(location) {
+        // think about different inputTables
+        const data = await db.query(`select location_id from mainschema.location_dimension where location like '${location}'`);
+        const location_id = data.rows[0]['location_id'];
+        return location_id;
+    }
+
+    async getGenderIDFromDIM(gender) {
+        const data = await db.query(`select gender_id from mainschema.gender_dimension where gender like '${gender}'`);
+        const gender_id = data.rows[0]['gender_id'];
+        return gender_id;
+    }
+
+    async getSimpleIDFromDim(dimName, obj) {
+        const fields = Object.keys(obj);
+        console.log(fields);
+        // const condition = builder.buildConditionForSearchingCopy();
     }
 
 }
