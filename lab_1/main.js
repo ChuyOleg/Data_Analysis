@@ -14,6 +14,8 @@ app.get('/', async (req, res) => {
 });
 
 (async () => {
+    console.time('time');
     const data = await initialLoad();
     console.log('END');
+    console.timeEnd('time');
 })();

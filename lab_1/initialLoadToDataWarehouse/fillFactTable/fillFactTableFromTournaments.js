@@ -25,21 +25,26 @@ const fillFromTournaments = async (extraData) => {
 
     for (const obj of tournamentsData) {
 
-        const sport_id = await dataRecipient.getSportIDFromDim(obj['sport'], obj['discipline'], obj['event']);
-        const location_id = await dataRecipient.getLocationIDFromDIM(obj['country'], 'tournaments');
-        const time_id = await dataRecipient.getTimeIDFromDIM(obj['year']);
-        const human_id = await dataRecipient.getHumanIDFromDim(obj, 'tournaments');
-        const medal_id = medals_id[obj['medal']];
-        const gender_id = (obj['gender'] === 'Men') ? genders_id['male'] : genders_id['female'];
+        const info = {
+            'time_id': await dataRecipient.getTimeIDFromDIM(obj['year']),
+            'location_id': await dataRecipient.getLocationIDFromDIM(obj['country'], 'tournaments'),
+            'sport_id': await dataRecipient.getSportIDFromDim(obj['sport'], obj['discipline'], obj['event']),
+            'human_id': await dataRecipient.getHumanIDFromDim(obj, 'tournaments'),
+            'medal_id': medals_id[obj['medal']],
+            'gender_id': (obj['gender'] === 'Men') ? genders_id['male'] : genders_id['female']
+        }
 
-
-        // CHECK FOR COPY
-        await db.query(`insert into mainschema.fact_table(
-            time_id, location_id, fact_type, gender_id, medal_id, sport_id, human_id, win_tournament
-        ) values(
-            ${time_id}, ${location_id}, '${fact_type}', ${gender_id}, ${medal_id}, ${sport_id}, ${human_id}, 'Yes'
-        )`);
-
+        // check for a copy before inserting
+        if (await dataRecipient.hasNotCopyInFactTable('win_tournament', info)) {
+            
+            await db.query(`insert into mainschema.fact_table(
+                time_id, location_id, fact_type, gender_id, medal_id, sport_id, human_id, win_tournament
+            ) values(
+                ${info['time_id']}, ${info['location_id']}, '${fact_type}', ${info['gender_id']}, ${info['medal_id']}, ${info['sport_id']}, ${info['human_id']}, 'Yes'
+            )`);
+        
+        }
+    
     }
 
 };

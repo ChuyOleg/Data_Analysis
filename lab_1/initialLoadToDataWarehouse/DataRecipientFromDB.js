@@ -46,6 +46,63 @@ class DataRecipient {
          
     };
 
+    async hasNotCopyInFactTable(fact_type, info) {
+        
+        let data;
+
+        if (fact_type === 'population') {
+            
+            const populationEqualizer = (info['population'] === null) ? 'is' : '=';
+
+            data = await db.query(`select fact_id from mainschema.fact_table
+                where time_id = ${info['time_id']}
+                and location_id = ${info['location_id']}
+                and gender_id = ${info['gender_id']}
+                and population ${populationEqualizer} ${info['population']}
+            `);
+
+        } else if (fact_type === 'density') {
+
+            data = await db.query(`select fact_id from mainschema.fact_table
+                where time_id = ${info['time_id']}
+                and location_id = ${info['location_id']}
+                and pop_density = ${info['pop_density']}
+            `);
+
+        } else if (fact_type === 'win_tournament') {
+            
+            data = await db.query(`select fact_id from mainschema.fact_table
+                where time_id = ${info['time_id']}
+                and location_id = ${info['location_id']}
+                and sport_id = ${info['sport_id']}
+                and human_id = ${info['human_id']}
+                and medal_id = ${info['medal_id']}
+                and gender_id = ${info['gender_id']}
+            `);
+
+        } else if (fact_type === 'win_prize') {
+
+            const genderEqualizer = (info['gender_id'] === 'null') ? 'is' : '=';
+
+            data = await db.query(`select fact_id from mainschema.fact_table
+                where time_id = ${info['time_id']}
+                and location_id = ${info['location_id']}
+                and gender_id ${genderEqualizer} ${info['gender_id']}
+                and category_id = ${info['category_id']}
+                and organization_id = ${info['organization_id']}
+                and laureate_type_id = ${info['laureate_type_id']}
+                and human_id = ${info['human_id']}
+            `);
+
+        } else {
+            throw new Error('DataRecipientFromDB => hasNotCopyInFactTable incorrect fact_type!');
+        }
+    
+        if (data.rows.length === 0) return true;
+        return false;
+
+    }
+
     async getHumanCopy(obj, laureateInfoID) {
         
         const human = (Object.keys(obj).length > 1) ? 'laureate' : 'athlete';
