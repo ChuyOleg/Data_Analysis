@@ -16,6 +16,8 @@ const loadData_CSV_FromSource = async (file, tableName) => {
     .pipe(csv())
     .on('data', async data => {
 
+        
+
         if (argumentsLine === null) {
             argumentsLine = linesBuilder.createArgumentsLine(data);
         }

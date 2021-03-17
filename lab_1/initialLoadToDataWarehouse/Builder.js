@@ -10,12 +10,13 @@ class Builder {
 
             const data = obj[oldFieldNames[index]];
 
-            const equalizer = (newFieldNames[index] === 'year') ? '=' : 'like';
+            let equalizer = (newFieldNames[index] === 'year') ? `= ${data}` : `like '${data}'`;
+            if (data === null) equalizer = `is ${data}`
 
             if (index === 0) {
-                condition = `where ${newFieldNames[index]} ${equalizer} '${data}'`;
+                condition = `where ${newFieldNames[index]} ${equalizer}`;
             } else {
-                condition += ` and ${newFieldNames[index]} ${equalizer} '${data}'`;
+                condition += ` and ${newFieldNames[index]} ${equalizer}`;
             }
         
         }
@@ -29,12 +30,25 @@ class Builder {
         for (const field of fields) {
             const value = data[field];
             if (fields.indexOf(field) === 0) {
-                line += `'${value}'`;
+                if (value === null) {
+                    line += null;
+                } else {
+                    line += `'${value}'`;
+                }
             } else {
-                line += `, '${value}'`;
+                if (value === null) {
+                    line += ', ' + null;
+                } else {
+                    line += `, '${value}'`;
+                }
             }
         }
         return line;
+    }
+
+    buildEqualizer(value) {
+        if (value === null) return 'is null';
+        return `like '${value}'`;
     }
 
 };

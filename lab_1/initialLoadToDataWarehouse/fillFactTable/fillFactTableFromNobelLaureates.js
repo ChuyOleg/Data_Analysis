@@ -11,30 +11,32 @@ const fillFromNobelLaureates = async (extraData) => {
 
     const fact_type = 'win_prize';
 
-    const genders_id = {
-        'Male': await dataRecipient.getGenderIDFromDIM('male'),
-        'Female': await dataRecipient.getGenderIDFromDIM('female'),
-        'null': 'null'
-    }
+    // const genders_id = {
+    //     'Male': await dataRecipient.getGenderIDFromDIM('male'),
+    //     'Female': await dataRecipient.getGenderIDFromDIM('female'),
+    //     'null': 'null'
+    // }
 
-    const laureate_types = {
-        'Individual': await dataRecipient.getLaureateTypeIDFromDim('Individual'),
-        'Organization': await dataRecipient.getLaureateTypeIDFromDim('Organization')
-    }
+    // const laureate_types = {
+    //     'Individual': await dataRecipient.getLaureateTypeIDFromDim('Individual'),
+    //     'Organization': await dataRecipient.getLaureateTypeIDFromDim('Organization')
+    // }
 
     for (const obj of nobelData) {
 
-        const info = {
-            'time_id': await dataRecipient.getTimeIDFromDIM(obj['year']),
-            'location_id': await dataRecipient.getLocationIDFromDIM(obj['birth_country'], 'nobel_laureates'),
-            'gender_id': genders_id[obj['sex']],
-            'category_id': await dataRecipient.getCategoryIDFromDim(obj['category']),
-            'organization_id': await dataRecipient.getOrganizationIDFromDim(obj['organization_name'], obj['organization_city'], obj['organization_country']),
-            'laureate_type_id': laureate_types[obj['laureate_type']],
-            'human_id': await dataRecipient.getHumanIDFromDim(obj, 'nobel_laureates')
-        }  
+        const info = await dataRecipient.getNobelLaureateInfoForInsert(obj);
 
-        // check for a copy before inserting
+        // const info = {
+        //     'time_id': await dataRecipient.getTimeIDFromDIM(obj['year']),
+        //     'location_id': await dataRecipient.getLocationIDFromDIM(obj['birth_country'], 'nobel_laureates'),
+        //     'gender_id': genders_id[obj['sex']],
+        //     'category_id': await dataRecipient.getCategoryIDFromDim(obj['category']),
+        //     'organization_id': await dataRecipient.getOrganizationIDFromDim(obj['organization_name'], obj['organization_city'], obj['organization_country']),
+        //     'laureate_type_id': laureate_types[obj['laureate_type']],
+        //     'human_id': await dataRecipient.getHumanIDFromDim(obj, 'nobel_laureates')
+        // }  
+
+        // // check for a copy before inserting
         if (await dataRecipient.hasNotCopyInFactTable('win_prize', info)) {
             
             await db.query(`insert into mainschema.fact_table(

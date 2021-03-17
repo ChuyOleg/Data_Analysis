@@ -39,7 +39,7 @@ class GenerateAllData {
 
     getGenderData() {
         
-        const uniqueGender = [{ gender: 'male' }, { gender: 'female' }, { gender: 'total' }];
+        const uniqueGender = [{ gender: 'male' }, { gender: 'female' }, { gender: 'total' }, { gender: null}];
         const newColumnNames = 'gender';
         
         return [ uniqueGender, newColumnNames ];
