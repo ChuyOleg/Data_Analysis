@@ -135,6 +135,24 @@ class DataRecipient {
         return human_id;
     }
 
+    async getCategoryIDFromDim(category) {
+        const data = await db.query(`select category_id from mainschema.category_dimension where category like '${category}'`);
+        const category_id = data.rows[0]['category_id'];
+        return category_id;
+    }
+
+    async getOrganizationIDFromDim(name, city, country) {
+        const data = await db.query(`select organization_id from mainschema.organization_dimension where organization_name like '${name}' and organization_city like '${city}' and organization_country like '${country}'`);
+        const organization_id = data.rows[0]['organization_id'];
+        return organization_id;
+    }
+
+    async getLaureateTypeIDFromDim(type) {
+        const data = await db.query(`select laureate_type_id from mainschema.laureate_type_dimension where laureate_type like '${type}'`)
+        const laureate_type_id = data.rows[0]['laureate_type_id'];
+        return laureate_type_id;
+    }
+
 }
 
 module.exports = DataRecipient;
