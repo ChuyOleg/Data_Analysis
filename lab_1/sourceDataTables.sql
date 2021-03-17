@@ -129,3 +129,56 @@ create table mainschema.fact_table(
 	population float,
 	pop_density float
 );
+
+-- create triggers
+create or replace function loadNewPopulation() returns trigger as
+	$$ declare
+  	time_id int;
+  	location_id int;
+  	gender_id int;
+  	begin
+  
+  	select td.time_id from mainschema.time_dimension td where year = new.time into time_id;
+  	select ld.location_id from mainschema.location_dimension ld where location like new.location into location_id;
+  
+  	if (time_id is NULL) then
+		insert into mainschema.time_dimension(year) values(new.time);
+		select td.time_id from mainschema.time_dimension td where year = new.time into time_id;
+  	end if;
+  
+  	if (location_id is NULL) then
+		insert into mainschema.location_dimension(location) values(new.location);
+		select ld.location_id from mainschema.location_dimension ld where location like new.location into location_id;
+  	end if;
+
+  	if (new.popmale is not null) then
+		select gd.gender_id from mainschema.gender_dimension gd where gender like 'male' into gender_id;
+    	insert into mainschema.fact_table(time_id, location_id, fact_type, gender_id, population)
+		values(time_id, location_id, 'population', gender_id, new.popmale);
+  	end if;
+  
+	if (new.popfemale is not null) then
+		select gd.gender_id from mainschema.gender_dimension gd where gender like 'female' into gender_id;
+		insert into mainschema.fact_table(time_id, location_id, fact_type, gender_id, population)
+		values(time_id, location_id, 'population', gender_id, new.popfemale);
+	end if;
+	
+	if (new.poptotal is not null) then
+		select gd.gender_id from mainschema.gender_dimension gd where gender like 'total' into gender_id;
+		insert into mainschema.fact_table(time_id, location_id, fact_type, gender_id, population)
+		values(time_id, location_id, 'population', gender_id, new.poptotal);
+	end if;
+	
+	if (new.popdensity is not null) then
+		insert into mainschema.fact_table(time_id, location_id, fact_type, pop_density)
+		values(time_id, location_id, 'pop_density', new.popdensity);
+	end if;
+
+ 	return New;
+  	end $$
+  	language plpgsql;
+  
+create Trigger loadNewPopulationData
+  	after insert on public.population
+  	for each row
+  	execute procedure loadNewPopulation();

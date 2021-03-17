@@ -146,7 +146,7 @@ class DataRecipient {
             const locationEq = builder.buildEqualizer(location);
             data = await db.query(`select location_id from mainschema.location_dimension where location ${locationEq}`);
         } else if (input_table === 'tournaments') {
-            const locationEq = (location === null) ? 'is null': `like 'like lower('${location}%')`;
+            const locationEq = (location === null) ? 'is null': `like lower('${location}%')`;
             data = await db.query(`select location_id from mainschema.location_dimension where lower(location) ${locationEq}`);
         } else if (input_table === 'nobel_laureates') {
             const locationEq = (location === null) ? 'is null' : `like lower('${location}')`;
