@@ -45,7 +45,7 @@ const fillFromPopulation = async () => {
             info['population'] = population[gender];
 
             // check for a copy before inserting
-            if (await dataRecipient.hasNotCopyInFactTable('population', info)) {
+            // if (await dataRecipient.hasNotCopyInFactTable('population', info)) {
                 
                 await db.query(`insert into mainschema.fact_table(
                     time_id, location_id, gender_id, fact_type, population
@@ -53,7 +53,7 @@ const fillFromPopulation = async () => {
                     ${info['time_id']}, ${info['location_id']}, ${info['gender_id']}, '${fact_type_1}', ${info['population']}
                 )`);
 
-            }
+            // }
             
         }
 

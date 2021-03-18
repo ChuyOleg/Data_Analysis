@@ -57,7 +57,10 @@ create table mainschema.time_dimension(
 
 create table mainschema.location_dimension(
 	location_id serial Primary Key,
-	location text
+	location text,
+	locID int,
+	load_data date default date('0001-01-01'),
+	load_data_end date default date('9999-12-31')
 );
 
 create table mainschema.gender_dimension(
@@ -136,49 +139,65 @@ create table mainschema.fact_table(
 create or replace function loadNewPopulation() returns trigger as
 	$$ declare
   	time_id int;
-  	location_id int;
+  	my_location_id int;
   	gender_id int;
   	begin
   
   	select td.time_id from mainschema.time_dimension td where year = new.time into time_id;
-  	select ld.location_id from mainschema.location_dimension ld where location like new.location into location_id;
+  	select ld.location_id from mainschema.location_dimension ld where locid = new.locid into my_location_id;
   
   	if (time_id is NULL) then
 		insert into mainschema.time_dimension(year) values(new.time);
 		select td.time_id from mainschema.time_dimension td where year = new.time into time_id;
   	end if;
   
-  	if (location_id is NULL) then
-		insert into mainschema.location_dimension(location) values(new.location);
-		select ld.location_id from mainschema.location_dimension ld where location like new.location into location_id;
-  	end if;
+  	if (my_location_id is NULL) then
+		insert into mainschema.location_dimension(location, locid) values(new.location, new.locid);
+		select ld.location_id from mainschema.location_dimension ld where locid = new.locid into my_location_id;
+  	else 
+		if (new.location not like (select location from mainschema.location_dimension ld where ld.location_id = my_location_id)) then
+		
+		update mainschema.location_dimension
+		set load_data_end = current_date
+		where locid = new.locid ;
+		
+		insert into mainschema.location_dimension(location, locid, load_data, load_data_end)
+		values(new.location, new.locid, current_date + 1, date('9999-12-31'));
 
-  	if (new.popmale is not null) then
+		select ld.location_id from mainschema.location_dimension ld where locid = new.locid and location like new.location into my_location_id;
+		
+		end if;
+	end if;
+	
+	
+
+   	if (new.popmale is not null) then
 		select gd.gender_id from mainschema.gender_dimension gd where gender like 'male' into gender_id;
     	insert into mainschema.fact_table(time_id, location_id, fact_type, gender_id, population)
-		values(time_id, location_id, 'population', gender_id, new.popmale);
-  	end if;
+ 		values(time_id, my_location_id, 'population', gender_id, new.popmale);
+   	end if;
   
-	if (new.popfemale is not null) then
-		select gd.gender_id from mainschema.gender_dimension gd where gender like 'female' into gender_id;
-		insert into mainschema.fact_table(time_id, location_id, fact_type, gender_id, population)
-		values(time_id, location_id, 'population', gender_id, new.popfemale);
-	end if;
+ 	if (new.popfemale is not null) then
+ 		select gd.gender_id from mainschema.gender_dimension gd where gender like 'female' into gender_id;
+ 		insert into mainschema.fact_table(time_id, location_id, fact_type, gender_id, population)
+ 		values(time_id, my_location_id, 'population', gender_id, new.popfemale);
+ 	end if;
 	
 	if (new.poptotal is not null) then
-		select gd.gender_id from mainschema.gender_dimension gd where gender like 'total' into gender_id;
-		insert into mainschema.fact_table(time_id, location_id, fact_type, gender_id, population)
-		values(time_id, location_id, 'population', gender_id, new.poptotal);
-	end if;
+ 		select gd.gender_id from mainschema.gender_dimension gd where gender like 'total' into gender_id;
+ 		insert into mainschema.fact_table(time_id, location_id, fact_type, gender_id, population)
+ 		values(time_id, my_location_id, 'population', gender_id, new.poptotal);
+ 	end if;
 	
-	if (new.popdensity is not null) then
-		insert into mainschema.fact_table(time_id, location_id, fact_type, pop_density)
-		values(time_id, location_id, 'pop_density', new.popdensity);
-	end if;
+ 	if (new.popdensity is not null) then
+ 		insert into mainschema.fact_table(time_id, location_id, fact_type, pop_density)
+ 		values(time_id, my_location_id, 'pop_density', new.popdensity);
+ 	end if;
 
  	return New;
   	end $$
   	language plpgsql;
+
   
 create Trigger loadNewPopulationData
   	after insert on public.population
@@ -295,9 +314,9 @@ create or replace function loadNewNobelLaureates() returns trigger as
 		select hd.human_id from mainschema.human_dimension hd
 		where full_name like new.full_name and hd.laureate_info_id = my_laureate_info_id into human_id;
 	end if;
-
-  	insert into public.testTable(time_id, location_id, gender_id, human_id, organization_id, category_id, laureate_type_id, laureate_info_id)
-	values(time_id, location_id, gender_id, human_id, organization_id, category_id, laureate_type_id, my_laureate_info_id);
+	
+  	insert into mainschema.fact_table(time_id, location_id, gender_id, human_id, organization_id, category_id, laureate_type_id, fact_type, win_prize)
+	values(time_id, location_id, gender_id, human_id, organization_id, category_id, laureate_type_id, 'win_prize', 'Yes');
   
  	return New;	
   	end $$

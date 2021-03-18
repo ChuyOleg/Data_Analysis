@@ -35,7 +35,7 @@ const fillFromTournaments = async (extraData) => {
         }
 
         // check for a copy before inserting
-        if (await dataRecipient.hasNotCopyInFactTable('win_tournament', info)) {
+        // if (await dataRecipient.hasNotCopyInFactTable('win_tournament', info)) {
             
             await db.query(`insert into mainschema.fact_table(
                 time_id, location_id, fact_type, gender_id, medal_id, sport_id, human_id, win_tournament
@@ -43,7 +43,7 @@ const fillFromTournaments = async (extraData) => {
                 ${info['time_id']}, ${info['location_id']}, '${fact_type}', ${info['gender_id']}, ${info['medal_id']}, ${info['sport_id']}, ${info['human_id']}, 'Yes'
             )`);
         
-        }
+        // }
     
     }
 
