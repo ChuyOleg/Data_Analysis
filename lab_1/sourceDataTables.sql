@@ -131,6 +131,8 @@ create table mainschema.fact_table(
 );
 
 -- create triggers
+
+-- for new data in public.population
 create or replace function loadNewPopulation() returns trigger as
 	$$ declare
   	time_id int;
@@ -182,3 +184,126 @@ create Trigger loadNewPopulationData
   	after insert on public.population
   	for each row
   	execute procedure loadNewPopulation();
+
+
+-- for new data in public.nobel_laureates
+create or replace function loadNewNobelLaureates() returns trigger as
+	$$ declare
+  	time_id int;
+  	location_id int;
+  	gender_id int;
+	organization_id int;
+	category_id int;
+	laureate_type_id int;
+	my_laureate_info_id int;
+  	human_id int;
+	begin
+
+	select td.time_id from mainschema.time_dimension td where year = new.year into time_id;
+	
+	if (time_id is NULL) then
+		insert into mainschema.time_dimension(year) values(new.year);
+		select td.time_id from mainschema.time_dimension td where year = new.year into time_id;
+  	end if;
+	
+	if (new.birth_country is null) then
+		select ld.location_id from mainschema.location_dimension ld where location is null into location_id;
+	else
+		select ld.location_id from mainschema.location_dimension ld where lower(location) like lower(new.birth_country) into location_id;	
+	end if;
+	
+	if (location_id is Null) then
+		insert into mainschema.location_dimension(location) values(lower(new.birth_country));
+		select ld.location_id from mainschema.location_dimension ld where lower(location) like lower(new.birth_country) into location_id;
+	end if;
+	
+	if (new.sex is null) then
+		select gd.gender_id from mainschema.gender_dimension gd where gender is null into gender_id;
+	else
+		select gd.gender_id from mainschema.gender_dimension gd where gender like lower(new.sex) into gender_id;
+	end if;
+	
+	if (new.organization_name is null) then
+		select od.organization_id from mainschema.organization_dimension od
+			where organization_name is null
+			and organization_city is null
+			and organization_country is null
+			into organization_id;
+	else
+		select od.organization_id from mainschema.organization_dimension od 
+			where organization_name like new.organization_name
+			and organization_city like new.organization_city
+			and organization_country like new.organization_country
+			into organization_id;
+	end if;
+	
+	if (organization_id is null) then
+		insert into mainschema.organization_dimension(organization_name, organization_city, organization_country) 
+		values(new.organization_name, new.organization_city, new.organization_country);
+		select od.organization_id from mainschema.organization_dimension od 
+			where organization_name like new.organization_name
+			and organization_city like new.organization_city
+			and organization_country like new.organization_country
+			into organization_id;
+	end if;
+
+	select cd.category_id from mainschema.category_dimension cd where category like new.category into category_id;
+	
+	if (category_id is null) then
+		insert into mainschema.category_dimension(category) values(new.category);
+		select cd.category_id from mainschema.category_dimension cd where category like new.category into category_id;
+	end if;
+	
+	select lrd.laureate_type_id from mainschema.laureate_type_dimension lrd where laureate_type like new.laureate_type into laureate_type_id;
+
+	if (new.birth_date is null) then
+		select li.laureate_info_id from mainschema.laureate_info li
+			where birth_date is null and birth_city is null and birth_country is null into my_laureate_info_id;
+	elseif (new.death_date is null) then
+		select li.laureate_info_id from mainschema.laureate_info li
+			where birth_date like new.birth_date and birth_city like new.birth_city and birth_country like new.birth_country
+			and death_date is null and death_city is null and death_country is null
+			into my_laureate_info_id;
+	else
+		select li.laureate_info_id from mainschema.laureate_info li
+			where birth_date like new.birth_date and birth_city like new.birth_city and birth_country like new.birth_country
+			and death_date like new.death_date and death_city like new.death_city and death_country like new.death_country
+			into my_laureate_info_id;
+	end if;
+	
+	if (my_laureate_info_id is null) then
+		insert into mainschema.laureate_info(birth_date, birth_city, birth_country, death_date, death_city, death_country)
+		values(new.birth_date, new.birth_city, new.birth_country, new.death_date, new.death_city, new.death_country);
+		if (new.death_date is null) then
+			select li.laureate_info_id from mainschema.laureate_info li
+				where birth_date like new.birth_date and birth_city like new.birth_city and birth_country like new.birth_country
+				and death_date is null and death_city is null and death_country is null
+				into my_laureate_info_id;
+		else
+			select li.laureate_info_id from mainschema.laureate_info li
+				where birth_date like new.birth_date and birth_city like new.birth_city and birth_country like new.birth_country
+				and death_date like new.death_date and death_city like new.death_city and death_country like new.death_country
+				into my_laureate_info_id;
+		end if;
+	end if;
+
+	select hd.human_id from mainschema.human_dimension hd
+		where full_name like new.full_name and hd.laureate_info_id = my_laureate_info_id into human_id;
+
+	if (human_id is null) then
+		insert into mainschema.human_dimension(full_name, laureate_info_id) values(new.full_name, my_laureate_info_id);
+		select hd.human_id from mainschema.human_dimension hd
+		where full_name like new.full_name and hd.laureate_info_id = my_laureate_info_id into human_id;
+	end if;
+
+  	insert into public.testTable(time_id, location_id, gender_id, human_id, organization_id, category_id, laureate_type_id, laureate_info_id)
+	values(time_id, location_id, gender_id, human_id, organization_id, category_id, laureate_type_id, my_laureate_info_id);
+  
+ 	return New;	
+  	end $$
+  	language plpgsql;
+
+create Trigger loadNewNobelLaureatesData
+  	after insert on public.nobel_laureates
+  	for each row
+  	execute procedure loadNewNobelLaureates();
