@@ -7,7 +7,6 @@ const LinesBuilder = require('./linesBuilderForSQL');
 
 const linesBuilder = new LinesBuilder();
 
-
 const asyncFunc = async (data, argumentsLine, table) => {
     
     const valuesLine = linesBuilder.createValuesLine(data);
@@ -40,7 +39,6 @@ const loadData_CSV_FromSource = async (file, tableName) => {
                 argumentsLine = linesBuilder.createArgumentsLine(data);
             }
 
-            const valuesLine = linesBuilder.createValuesLine(data);
             promises.push(asyncFunc(data, argumentsLine, tableNameLowerCase));
 
         })

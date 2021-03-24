@@ -48,63 +48,6 @@ class DataRecipient {
          
     };
 
-    async hasNotCopyInFactTable(fact_type, info) {
-        
-        let data;
-
-        if (fact_type === 'population') {
-            
-            const populationEqualizer = (info['population'] === null) ? 'is' : '=';
-
-            data = await db.query(`select fact_id from mainschema.fact_table
-                where time_id = ${info['time_id']}
-                and location_id = ${info['location_id']}
-                and gender_id = ${info['gender_id']}
-                and population ${populationEqualizer} ${info['population']}
-            `);
-
-        } else if (fact_type === 'density') {
-
-            data = await db.query(`select fact_id from mainschema.fact_table
-                where time_id = ${info['time_id']}
-                and location_id = ${info['location_id']}
-                and pop_density = ${info['pop_density']}
-            `);
-
-        } else if (fact_type === 'win_tournament') {
-            
-            data = await db.query(`select fact_id from mainschema.fact_table
-                where time_id = ${info['time_id']}
-                and location_id = ${info['location_id']}
-                and sport_id = ${info['sport_id']}
-                and human_id = ${info['human_id']}
-                and medal_id = ${info['medal_id']}
-                and gender_id = ${info['gender_id']}
-            `);
-
-        } else if (fact_type === 'win_prize') {
-
-            const genderEqualizer = (info['gender_id'] === 'null') ? 'is' : '=';
-
-            data = await db.query(`select fact_id from mainschema.fact_table
-                where time_id = ${info['time_id']}
-                and location_id = ${info['location_id']}
-                and gender_id ${genderEqualizer} ${info['gender_id']}
-                and category_id = ${info['category_id']}
-                and organization_id = ${info['organization_id']}
-                and laureate_type_id = ${info['laureate_type_id']}
-                and human_id = ${info['human_id']}
-            `);
-
-        } else {
-            throw new Error('DataRecipientFromDB => hasNotCopyInFactTable incorrect fact_type!');
-        }
-    
-        if (data.rows.length === 0) return true;
-        return false;
-
-    }
-
     async getHumanCopy(obj, laureateInfoID) {
         
         const human = (Object.keys(obj).length > 1) ? 'laureate' : 'athlete';
@@ -134,88 +77,51 @@ class DataRecipient {
         return validData;
     }
 
-    async getTimeIDFromDIM(year) {
-        const data = await db.query(`select time_id from mainschema.time_dimension where year = ${year}`);
-        const time_id = data.rows[0]['time_id'];
-        return time_id;
-    }
-
-    async getLocationIDFromDIM(location, input_table) {
-        let data;
-        if (input_table === 'population') {
-            const locationEq = builder.buildEqualizer(location);
-            data = await db.query(`select location_id from mainschema.location_dimension where location ${locationEq}`);
-        } else if (input_table === 'tournaments') {
-            const locationEq = (location === null) ? 'is null': `like lower('${location}%')`;
-            data = await db.query(`select location_id from mainschema.location_dimension where lower(location) ${locationEq}`);
-        } else if (input_table === 'nobel_laureates') {
-            const locationEq = (location === null) ? 'is null' : `like lower('${location}')`;
-            data = await db.query(`select location_id from mainschema.location_dimension where lower(location) ${locationEq}`);
-        } else {
-            throw new Error('DataRecipientFromDB => getLocationIDFromDIm incorrect input_table');
-        }
-        const location_id = data.rows[0]['location_id'];
-        return location_id;
-    }
-
     async getGenderIDFromDIM(gender) {
         const data = await db.query(`select gender_id from mainschema.gender_dimension where gender like '${gender}'`);
         const gender_id = data.rows[0]['gender_id'];
         return gender_id;
     }
 
-    async getMedalIDFromDim(medal) {
-        const data = await db.query(`select medal_id from mainschema.medal_dimension where medal like '${medal}'`);
-        const medal_id = data.rows[0]['medal_id'];
-        return medal_id;
+    async getPopulationInfoForInsert(obj) {
+
+        const locationEqualizer = (obj['location'] === null) ? 'is null' : `like '${obj['location']}'`;
+
+        const data = await db.query(`
+            select * from (
+                (select time_id from mainschema.time_dimension where year = ${obj['time']}) as time
+                cross join
+                (select location_id from mainschema.location_dimension where location ${locationEqualizer}) as loc
+            )
+        `);
+
+        return data.rows[0];
     }
 
-    async getSportIDFromDim(sport, discipline, event) {
-        const data = await db.query(`select sport_id from mainschema.sport_dimension where sport like '${sport}' and discipline like '${discipline}' and event like '${event}'`)
-        const sport_id = data.rows[0]['sport_id'];
-        return sport_id;
-    }
+    async getTournamentInfoForInsert(obj) {
 
-    async getLaureateInfoID(obj) {
-        const argumentsArr = extraData.dimColumns['laureate_info'];
-        const laureateInfoCondition = builder.buildConditionForSearchingCopy(argumentsArr, argumentsArr, obj);
-        let laureateInfoID = await this.getLaureateInfoCopy(laureateInfoCondition, obj);
-        return laureateInfoID[0]['laureate_info_id'];
-    }
+        const locationEqualizer = (obj['country'] === null) ? 'is null': `like lower('${obj['country']}%')`;
+        const gender = (obj['gender'] === 'Men') ? 'male' : 'female';
 
-    async getHumanIDFromDim(human, input_table) {
-        let data;
-        if (input_table === 'tournaments') {
-            data = await db.query(`select * from mainschema.human_dimension where full_name like '${human['athlete']}' and laureate_info_id is null`);
-        } else if (input_table === 'nobel_laureates') {
-            const laureateInfoID = await this.getLaureateInfoID(human);
-            data = await db.query(`select * from mainschema.human_dimension where full_name like '${human['full_name']}' and laureate_info_id = ${laureateInfoID}`);
-        } else {
-            throw new Error('DataRecipientFromDB => getHumanIDFromDim incorrect input_table');
-        }
-        const human_id = data.rows[0]['human_id'];
-        return human_id;
-    }
+        const data = await db.query(`
+            select * from (
+                (select time_id from mainschema.time_dimension where year = ${obj['year']}) as time
+                cross join
+                (select location_id from mainschema.location_dimension where lower(location) ${locationEqualizer}) as loc
+                cross join
+                (select sport_id from mainschema.sport_dimension where
+                    sport like '${obj['sport']}' and discipline like '${obj['discipline']}' and event like '${obj['event']}') as sport
+                cross join
+                (select human_id from mainschema.human_dimension where full_name like '${obj['athlete']}' and laureate_info_id is null) as hum
+                cross join
+                (select medal_id from mainschema.medal_dimension where medal like '${obj['medal']}') as medal
+                cross join
+                (select gender_id from mainschema.gender_dimension where gender like '${gender}') as gender
+            )
+        `);
 
-    async getCategoryIDFromDim(category) {
-        const data = await db.query(`select category_id from mainschema.category_dimension where category like '${category}'`);
-        const category_id = data.rows[0]['category_id'];
-        return category_id;
-    }
+        return data.rows[0];
 
-    async getOrganizationIDFromDim(name, city, country) {
-        const nameEq = builder.buildEqualizer(name);
-        const cityEq = builder.buildEqualizer(city);
-        const countryEq = builder.buildEqualizer(country);
-        const data = await db.query(`select organization_id from mainschema.organization_dimension where organization_name ${nameEq} and organization_city ${cityEq} and organization_country ${countryEq}`);
-        const organization_id = data.rows[0]['organization_id'];
-        return organization_id;
-    }
-
-    async getLaureateTypeIDFromDim(type) {
-        const data = await db.query(`select laureate_type_id from mainschema.laureate_type_dimension where laureate_type like '${type}'`)
-        const laureate_type_id = data.rows[0]['laureate_type_id'];
-        return laureate_type_id;
     }
 
     async getNobelLaureateInfoForInsert(obj) {
@@ -224,13 +130,13 @@ class DataRecipient {
         const orgNameEqualizer = (obj['organization_name'] === null) ? 'is null' : `like '${obj['organization_name']}'`;
         const orgCityEqualizer = (obj['organization_city'] === null) ? 'is null' : `like '${obj['organization_city']}'`;
         const orgCountryEqualizer = (obj['organization_country'] === null) ? 'is null' : `like '${obj['organization_country']}'`;
-        const locationEqualizer = (obj['birth_country'] === null) ? 'is null' : `like '${obj['birth_country']}'`;
+        const locationEqualizer = (obj['birth_country'] === null) ? 'is null' : `like lower('${obj['birth_country']}')`;
 
         const data = await db.query(`
             select * from (
                 (select time_id from mainschema.time_dimension where year = ${obj['year']}) as time
                 cross join
-                (select location_id from mainschema.location_dimension where location ${locationEqualizer}) as loc       
+                (select location_id from mainschema.location_dimension where lower(location) ${locationEqualizer}) as loc       
                 cross join
                 (select gender_id from mainschema.gender_dimension where gender ${sexCondition}) as gen
                 cross join

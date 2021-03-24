@@ -25,14 +25,18 @@ class GenerateAllData {
             throw new Error(`${table} isn't exist. Check arguments!`);
         }
 
-        const newColumnNames = 'location';
+        let newColumnNames = 'location';
+        if (table === 'population') newColumnNames = 'location, locid';
+        
         let oldColumnNames;
+        let uniqueCountries;
 
-        if (table === 'population') oldColumnNames = ['location'];
+        if (table === 'population') oldColumnNames = ['location', 'locid'];
         else if (table === 'tournaments') oldColumnNames = ['country'];
         else oldColumnNames = ['birth_country'];
-   
-        const uniqueCountries = await dataRecipient.getRows(`public.${table}`, oldColumnNames[0]);
+        
+        if (table === 'population') uniqueCountries = await dataRecipient.getRows(`public.${table}`, 'location', 'locid');
+        else uniqueCountries = await dataRecipient.getRows(`public.${table}`, oldColumnNames[0]);
 
         return [ uniqueCountries, newColumnNames, oldColumnNames ];
     }

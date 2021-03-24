@@ -10,7 +10,7 @@ class Builder {
 
             const data = obj[oldFieldNames[index]];
 
-            let equalizer = (newFieldNames[index] === 'year') ? `= ${data}` : `like '${data}'`;
+            let equalizer = (newFieldNames[index] === 'year' || newFieldNames[index] === 'locid') ? `= ${data}` : `like '${data}'`;
             if (data === null) equalizer = `is ${data}`
 
             if (index === 0) {

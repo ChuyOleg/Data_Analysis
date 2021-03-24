@@ -25,3 +25,15 @@
 -- where location_id = (select location_id from mainschema.location_dimension where location like 'New Suriname')
 
 -- запустити догрузку даних
+
+-- clear all tables
+-- truncate table mainschema.time_dimension cascade;
+-- truncate table mainschema.location_dimension cascade;
+-- truncate table mainschema.gender_dimension cascade;
+-- truncate table mainschema.sport_dimension cascade;
+-- truncate table mainschema.medal_dimension cascade;
+-- truncate table mainschema.category_dimension cascade;
+-- truncate table mainschema.organization_dimension cascade;
+-- truncate table mainschema.laureate_type_dimension cascade;
+-- truncate table mainschema.laureate_info cascade;
+-- truncate table mainschema.human_dimension cascade;
