@@ -89,7 +89,7 @@ create table mainschema.human_dimension(
 	human_id serial Primary Key,
 	full_name text,
 	laureate_info_id int references mainschema.laureate_info(laureate_info_id)
-)
+);
 
 create table mainschema.medal_dimension(
 	medal_id serial Primary Key,

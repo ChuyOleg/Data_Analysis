@@ -5,7 +5,7 @@ const db = require('../../db');
 
 const dataRecipient = new DataRecipientFromDB;
 
-const fillFromTournaments = async (extraData) => {
+const fillFromTournaments = async () => {
 
     const tournamentsData = await dataRecipient.getInputTableData('tournaments');
 

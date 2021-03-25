@@ -9,13 +9,13 @@ const initialLoad = async () => {
 
     const extraData = new ExtraData();
 
-    for (const dim of extraData.dimensionArr) {
-        for (const inputTable of extraData.inputTablesByDimension[dim]) {
-            await insertDataIntoTables(inputTable, dim);
-        }
-    }
+    // for (const dim of extraData.dimensionArr) {
+    //     for (const inputTable of extraData.inputTablesByDimension[dim]) {
+    //         await insertDataIntoTables(inputTable, dim);
+    //     }
+    // }
 
-    await fillFactTable(extraData);
+    // await fillFactTable();
 
 };
 

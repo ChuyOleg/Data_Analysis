@@ -6,11 +6,11 @@ const fillFromPopulation = require('./fillFactTable/fillFactTableFromPopulation'
 const fillFromTournaments = require('./fillFactTable/fillFactTableFromTournaments');
 const fillFromNobelLaureates = require('./fillFactTable/fillFactTableFromNobelLaureates');
 
-const fillFactTable = async (extraData) => {
+const fillFactTable = async () => {
 
-    await fillFromPopulation(extraData);
-    await fillFromTournaments(extraData);
-    await fillFromNobelLaureates(extraData);
+    await fillFromPopulation();
+    await fillFromTournaments();
+    await fillFromNobelLaureates();
 
 };
 

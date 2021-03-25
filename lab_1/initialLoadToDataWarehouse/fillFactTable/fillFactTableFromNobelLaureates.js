@@ -5,7 +5,7 @@ const db = require('../../db');
 
 const dataRecipient = new DataRecipientFromDB;
 
-const fillFromNobelLaureates = async (extraData) => {
+const fillFromNobelLaureates = async () => {
 
     const nobelData = await dataRecipient.getInputTableData('nobel_laureates');
 
